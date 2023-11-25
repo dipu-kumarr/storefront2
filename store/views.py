@@ -17,28 +17,9 @@ from rest_framework.viewsets import ModelViewSet
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    
     def get_serializer_context(self):
         return {'request': self.request}
-    
-    
-class ProductList(ListCreateAPIView):
-    queryset = Product.objects.select_related('collection').all()
-    serializer_class = ProductSerializer
-    
-    # def get(self,request):
-    #     queryset = Product.objects.select_related('collection').all()
-    #     serializer = ProductSerializer(queryset, many=True, context={'request': request})
-    #     return Response(serializer.data)
-    # def post(self,request):
-    #     serializer = ProductSerializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     print(serializer.validated_data)
-    #     serializer.save()
-    #     return Response(serializer.data,status=status.HTTP_201_CREATED)
-
-
-
-class ProductDetail(RetrieveUpdateDestroyAPIView):
     
     def delete(self, request,id):
         product = get_object_or_404(Product, pk=id)
@@ -46,27 +27,11 @@ class ProductDetail(RetrieveUpdateDestroyAPIView):
             return Response({'error':'Product cannot be deleted becauseit is  associated with order item'},status=status.HTTP_405_METHOD_NOT_ALLOWED)
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
-class CollectionList(ListCreateAPIView):
+
+class CollectionViewSet(ModelViewSet):
     queryset = Collection.objects.annotate(
         products_count=Count('products')).all()
-    serializer_class = CollectionSerializer
 
-# @api_view(['GET','POST'])
-# def collection_list(request):
-#     if request.method =='GET':
-#             queryset = Collection.objects.annotate(products_count=Count('products')).all()
-#             serializer = CollectionSerializer(queryset, many=True)
-#             return Response(serializer.data)
-#     elif request.method =='POST':                                                
-#         serializer = CollectionSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         # print(serializer.validated_data)
-#         serializer.save()
-#         return Response(serializer.data,status=status.HTTP_201_CREATED)
-
-class CollectionDetail(RetrieveUpdateDestroyAPIView):
-    queryset=Collection.objects.annotate(products_count=Count('products'))
     serializer_class = CollectionSerializer
 
     def delete(self, request,pk):
@@ -76,4 +41,8 @@ class CollectionDetail(RetrieveUpdateDestroyAPIView):
                             ,status=status.HTTP_405_METHOD_NOT_ALLOWED)
         collection.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+    
     
