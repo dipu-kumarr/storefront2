@@ -21,12 +21,12 @@ class ProductViewSet(ModelViewSet):
     def get_serializer_context(self):
         return {'request': self.request}
     
-    def delete(self, request,id):
-        product = get_object_or_404(Product, pk=id)
-        if product.orderitems.count() > 0:  # type: ignore
-            return Response({'error':'Product cannot be deleted becauseit is  associated with order item'},status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        product.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def destroy(self, request, *args, **kwargs):
+        if OrderItem.objects.filter(product_id = kwargs['pk']).count() >0:
+            return Response({'error':'Product cannot be deleted because it is  associated with order item'}
+                            ,status=status.HTTP_405_METHOD_NOT_ALLOWED)                           
+        return super().destroy(request, *args, **kwargs)
+    
 
 class CollectionViewSet(ModelViewSet):
     queryset = Collection.objects.annotate(
