@@ -5,8 +5,8 @@ from django.http import HttpResponse
 from rest_framework.decorators import api_view  
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Product,OrderItem,Collection
-from .serializers import CollectionSerializer, ProductSerializer
+from .models import Product,OrderItem,Collection,Review
+from .serializers import CollectionSerializer, ProductSerializer,ReviewSerializer
 from django.db.models import Value,Count
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView,RetrieveUpdateDestroyAPIView
@@ -29,9 +29,7 @@ class ProductViewSet(ModelViewSet):
     
 
 class CollectionViewSet(ModelViewSet):
-    queryset = Collection.objects.annotate(
-        products_count=Count('products')).all()
-
+    queryset = Collection.objects.annotate(products_count=Count('products')).all()
     serializer_class = CollectionSerializer
 
     def delete(self, request,pk):
@@ -42,7 +40,13 @@ class CollectionViewSet(ModelViewSet):
         collection.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class ReviewViewSet(ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
 
+    def get_serializer_context(self):
+        return {'product_id': self.kwargs['product_pk'],}
+        
 
     
     
