@@ -1,15 +1,16 @@
 
 # from typing import Collection
+from django.db.models import Value,Count
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter,OrderingFilter
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
 from store.filters import ProductFilter
 from .models import Product,OrderItem,Collection,Review
 from .serializers import CollectionSerializer, ProductSerializer,ReviewSerializer
-from django.db.models import Value,Count
-from rest_framework.viewsets import ModelViewSet
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter
 
 # Create your views here.
 
@@ -18,9 +19,11 @@ class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     
-    filter_backends = [DjangoFilterBackend,SearchFilter]
+    filter_backends = [DjangoFilterBackend,SearchFilter,OrderingFilter]
     filterset_class = ProductFilter
-    search_fields = ['title','description','collection__title']
+    pagination_class = PageNumberPagination
+    search_fields = ['title','description']
+    Ordering_fields = ['unit_price','last_updated']
     
 
     def get_serializer_context(self):
