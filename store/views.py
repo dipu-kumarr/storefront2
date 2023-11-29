@@ -64,6 +64,7 @@ class CartViewSet(CreateModelMixin,RetrieveModelMixin,DestroyModelMixin,GenericV
     serializer_class = CartSerializer
 
 class CartItemViewSet(ModelViewSet):
+    http_method_names = ['get','post','patch','delete']
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -80,6 +81,3 @@ class CartItemViewSet(ModelViewSet):
             .filter(cart_id=self.kwargs['cart_pk']) \
             .select_related('product')
     
-
-
-   

@@ -80,8 +80,8 @@ class AddCartItemSerializer(serializers.ModelSerializer):
 
     def save(self, **kwargs):
         cart_id = self.context['cart_id']
-        product_id = self.validated_data['product_id']
-        quantity = self.validated_data['quantity']
+        product_id = self.validated_data['product_id'] # type: ignore
+        quantity = self.validated_data['quantity'] # type: ignore
 
         try:
             cart_item = CartItem.objects.get(
@@ -91,7 +91,7 @@ class AddCartItemSerializer(serializers.ModelSerializer):
             self.instance = cart_item
         except CartItem.DoesNotExist:
             self.instance = CartItem.objects.create(
-                cart_id=cart_id, **self.validated_data)
+                cart_id=cart_id, **self.validated_data) # type: ignore
 
         return self.instance
 
