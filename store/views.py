@@ -12,6 +12,8 @@ from rest_framework import status
 from core import serializers
 from store.filters import ProductFilter
 from store.pagination import DefaultPagination
+from store.permissions import IsAdminOrReadOnly
+from rest_framework.permissions import IsAdminUser , IsAuthenticated
 from .models import Cart, CartItem, Product,OrderItem,Collection,Review,Customer
 from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CollectionSerializer, CustomerSerializer, ProductSerializer, ReviewSerializer, UpdateCartItemSerializer
 
@@ -25,6 +27,7 @@ class ProductViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend,SearchFilter,OrderingFilter]
     filterset_class = ProductFilter
     pagination_class = DefaultPagination
+    permission_classes = [IsAdminOrReadOnly]
     search_fields = ['title','description']
     Ordering_fields = ['unit_price','last_updated']
     
@@ -42,7 +45,7 @@ class ProductViewSet(ModelViewSet):
 class CollectionViewSet(ModelViewSet):
     queryset = Collection.objects.annotate(products_count=Count('products')).all()
     serializer_class = CollectionSerializer
-
+    permission_classes = [IsAdminOrReadOnly]
     def delete(self, request,pk):
         collection = get_object_or_404(Collection, pk=pk)
         if collections.products.count() > 0:  # type: ignore
@@ -83,11 +86,12 @@ class CartItemViewSet(ModelViewSet):
             .filter(cart_id=self.kwargs['cart_pk']) \
             .select_related('product')
     
-class CustomerViewSet(CreateModelMixin,RetrieveModelMixin,UpdateModelMixin,GenericViewSet):
+class CustomerViewSet(ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
+    permission_classes = [IsAdminUser]
 
-    @action(detail=False,methods=['GET','PUT'])
+    @action(detail=False,methods=['GET','PUT'],permission_classes = [IsAuthenticated])
     def me(self,request):
         (customer,created) = Customer.objects.get_or_create(user_id=request.user.id)
         if request.method =='GET':
